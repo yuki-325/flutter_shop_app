@@ -37,9 +37,12 @@ class ProductItem extends StatelessWidget {
             icon: const Icon(Icons.favorite),
             color: Theme.of(context).colorScheme.secondary,
           ),
-          title: Text(
-            title,
-            textAlign: TextAlign.center,
+          title: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+            ),
           ),
           trailing: IconButton(
             onPressed: () {},
