@@ -14,7 +14,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<Products>(
-      // CHECK 状態管理するオブジェクトを設定している？
+      // NOTE 状態管理するオブジェクトを設定している
+      // NOTE 新しいインスタンスを使用するときはcreateメソッドの方が効率が良いらしい
       create: (context) => Products(),
       child: MaterialApp(
         title: 'My Shop',

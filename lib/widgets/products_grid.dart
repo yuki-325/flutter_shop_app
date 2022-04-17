@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/product.dart';
 import 'package:shop_app/providers/products.dart';
 
 import 'product_item.dart';
@@ -18,8 +19,9 @@ class ProductsGrid extends StatelessWidget {
     return GridView.builder(
       padding: const EdgeInsets.all(10.0),
       itemCount: products.length,
-      itemBuilder: (context, index) => ChangeNotifierProvider(
-        create: (context) => products[index],
+      itemBuilder: (context, index) => ChangeNotifierProvider<Product>.value(
+        // NOTE 新しいインスタンスを使用しないならvalueの方が効率がいいらしい
+        value: products[index],
         child: const ProductItem(
             // id: products[index].id,
             // title: products[index].title,
