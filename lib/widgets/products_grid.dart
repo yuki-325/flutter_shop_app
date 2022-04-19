@@ -6,7 +6,11 @@ import 'package:shop_app/providers/products.dart';
 import 'product_item.dart';
 
 class ProductsGrid extends StatelessWidget {
-  const ProductsGrid({Key? key}) : super(key: key);
+  final bool showFavs;
+  const ProductsGrid({
+    Key? key,
+    required this.showFavs,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +18,7 @@ class ProductsGrid extends StatelessWidget {
     final productsData = Provider.of<Products>(context);
 
     // ProductsオブジェクトからProductsを取得
-    final products = productsData.items;
+    final products = showFavs ? productsData.favoriteItems : productsData.items;
 
     return GridView.builder(
       padding: const EdgeInsets.all(10.0),
