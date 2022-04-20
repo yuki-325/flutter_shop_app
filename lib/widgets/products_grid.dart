@@ -25,6 +25,7 @@ class ProductsGrid extends StatelessWidget {
       itemCount: products.length,
       itemBuilder: (context, index) => ChangeNotifierProvider<Product>.value(
         // NOTE 新しいインスタンスを使用しないならvalueの方が効率がいいらしい
+        // CHECK main.dartでproductオブジェクトはproviderに登録してあるのにここで再度やる必要はあるのかな。。。？
         value: products[index],
         child: const ProductItem(
             // id: products[index].id,

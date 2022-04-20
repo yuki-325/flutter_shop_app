@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/providers/cart.dart';
 import 'package:shop_app/providers/products.dart';
 import 'package:shop_app/screen/product_detail_screen.dart';
 import 'package:shop_app/screen/products_overview_screen.dart';
@@ -13,10 +14,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<Products>(
-      // NOTE 状態管理するオブジェクトを設定している
-      // NOTE 新しいインスタンスを使用するときはcreateメソッドの方が効率が良いらしい
-      create: (context) => Products(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          // NOTE 状態管理するオブジェクトを設定している
+          // NOTE 新しいインスタンスを使用するときはcreateメソッドの方が効率が良いらしい
+          create: (_) => Products(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => Cart(),
+        ),
+      ],
       child: MaterialApp(
         title: 'My Shop',
         theme: ThemeData(
