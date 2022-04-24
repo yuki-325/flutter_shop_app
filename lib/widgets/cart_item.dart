@@ -3,14 +3,14 @@ import 'package:provider/provider.dart';
 
 import '../providers/cart.dart';
 
-class CartItem extends StatelessWidget {
+class CartItemWidget extends StatelessWidget {
   final String id;
   final String productId;
   final double price;
   final int quantity;
   final String title;
 
-  const CartItem({
+  const CartItemWidget({
     Key? key,
     required this.id,
     required this.productId,
