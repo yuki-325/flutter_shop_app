@@ -59,6 +59,22 @@ class ProductItem extends StatelessWidget {
           trailing: IconButton(
             onPressed: () {
               cart.addItem(product.id, product.price, product.title);
+
+              // スナックバーが表示されていれば閉じる(連続表示対策)
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+              // スナックバー
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: const Text(
+                  "Added item to cart!",
+                ),
+                duration: const Duration(seconds: 2),
+                action: SnackBarAction(
+                    label: "UNDO",
+                    onPressed: () {
+                      cart.removeItem(product.id);
+                    }),
+              ));
             },
             icon: const Icon(Icons.shopping_cart),
             color: Theme.of(context).colorScheme.secondary,
