@@ -81,4 +81,12 @@ class Products with ChangeNotifier {
     // NOTE 値(_items)の変更を通知する
     notifyListeners();
   }
+
+  void updateProduct(String productId, Product newProduct) {
+    final prodIndex = _items.indexWhere((product) => product.id == productId);
+    if (prodIndex != -1) {
+      _items[prodIndex] = newProduct;
+      notifyListeners();
+    }
+  }
 }

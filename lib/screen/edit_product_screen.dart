@@ -18,7 +18,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
-
+  var _isInit = true;
   var _editedProduct = Product(
     id: "",
     title: "",
@@ -26,11 +26,53 @@ class _EditProductScreenState extends State<EditProductScreen> {
     price: 0,
     imageUrl: "",
   );
+  var _formInitalData = {
+    "title": "",
+    "description": "",
+    "price": "",
+    "imageUrl": "",
+  };
+  var _saveProductData = {
+    "id": "",
+    "title": "",
+    "description": "",
+    "price": "",
+    "imageUrl": "",
+  };
 
   @override
   void initState() {
     _imageUrlFocusNode.addListener(_updateImageUrl);
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final productId = ModalRoute.of(context)!.settings.arguments as String;
+      if (productId.isNotEmpty) {
+        // 更新の場合
+        _editedProduct = Provider.of<Products>(context).findById(id: productId);
+        _formInitalData = {
+          "title": _editedProduct.title,
+          "description": _editedProduct.description,
+          "price": _editedProduct.price.toString(),
+          // "imageUrl": _editedProduct.imageUrl,
+          "imageUrl": "",
+        };
+        _saveProductData = {
+          "id": _editedProduct.id,
+          "title": _editedProduct.title,
+          "description": _editedProduct.description,
+          "price": _editedProduct.price.toString(),
+          // "imageUrl": _editedProduct.imageUrl,
+          "imageUrl": "",
+        };
+        _imageUrlController.text = _editedProduct.imageUrl;
+      }
+    }
+    _isInit = false;
+    super.didChangeDependencies();
   }
 
   @override
@@ -57,16 +99,34 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   void _saveForm() {
+    final productsData = Provider.of<Products>(context, listen: false);
     final isValid = _form.currentState?.validate();
     if (!(isValid!)) {
       return;
     }
     _form.currentState?.save();
+
+    _editedProduct = Product(
+      id: _saveProductData["id"]!,
+      title: _saveProductData["title"] ?? "",
+      description: _saveProductData["description"]!,
+      price: double.parse(_saveProductData["price"]!),
+      imageUrl: _saveProductData["imageUrl"]!,
+      isFavorite: _editedProduct.isFavorite,
+    );
+
+    if (_editedProduct.id.isEmpty) {
+      // 新規追加
+      productsData.addProduct(_editedProduct);
+    } else {
+      // 更新
+      _editedProduct.isFavorite = true;
+      productsData.updateProduct(_editedProduct.id, _editedProduct);
+    }
     print(_editedProduct.title);
     print(_editedProduct.description);
     print(_editedProduct.price);
     print(_editedProduct.imageUrl);
-    Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
     Navigator.of(context).pop();
   }
 
@@ -89,6 +149,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           child: ListView(
             children: [
               TextFormField(
+                initialValue: _formInitalData["title"],
                 decoration: const InputDecoration(labelText: "Title"),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {
@@ -101,16 +162,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   return null;
                 },
                 onSaved: (titleValue) {
-                  _editedProduct = Product(
-                    id: "",
-                    title: titleValue!,
-                    description: _editedProduct.description,
-                    price: _editedProduct.price,
-                    imageUrl: _editedProduct.imageUrl,
-                  );
+                  _saveProductData["title"] = titleValue!;
                 },
               ),
               TextFormField(
+                initialValue: _formInitalData["price"],
                 decoration: const InputDecoration(labelText: "Price"),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
@@ -131,16 +187,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   return null;
                 },
                 onSaved: (priceValue) {
-                  _editedProduct = Product(
-                    id: "",
-                    title: _editedProduct.title,
-                    description: _editedProduct.description,
-                    price: double.parse(priceValue!),
-                    imageUrl: _editedProduct.imageUrl,
-                  );
+                  _saveProductData["price"] = priceValue!;
                 },
               ),
               TextFormField(
+                initialValue: _formInitalData["description"],
                 decoration: const InputDecoration(labelText: "Description"),
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
@@ -155,13 +206,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   return null;
                 },
                 onSaved: (descriptionValue) {
-                  _editedProduct = Product(
-                    id: "",
-                    title: _editedProduct.title,
-                    description: descriptionValue!,
-                    price: _editedProduct.price,
-                    imageUrl: _editedProduct.imageUrl,
-                  );
+                  _saveProductData["description"] = descriptionValue!;
                 },
               ),
               Row(
@@ -182,6 +227,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             )),
                   Expanded(
                     child: TextFormField(
+                      // NOTE controllerがる場合はinitialValueは設定できないらしい
+                      // controllerのtextに直接値を設定する必要がある
+                      // initialValue: _initValues["imageUrl"],
                       decoration: const InputDecoration(labelText: "Image URL"),
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
@@ -197,13 +245,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         return null;
                       },
                       onSaved: (imageUrlValue) {
-                        _editedProduct = Product(
-                          id: "",
-                          title: _editedProduct.title,
-                          description: _editedProduct.description,
-                          price: _editedProduct.price,
-                          imageUrl: imageUrlValue!,
-                        );
+                        _saveProductData["imageUrl"] = imageUrlValue!;
                       },
                     ),
                   ),
