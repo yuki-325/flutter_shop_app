@@ -97,6 +97,9 @@ class Products with ChangeNotifier {
 
       // NOTE 値(_items)の変更を通知する
       notifyListeners();
+    }).catchError((error) {
+      print(error);
+      throw error;
     });
   }
 

@@ -119,7 +119,25 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     if (_editedProduct.id.isEmpty) {
       // 新規追加
-      productsData.addProduct(_editedProduct).then((_) {
+      productsData.addProduct(_editedProduct).catchError((error) {
+        // CHECK showDialog<void>だとだめだった
+        // ignore: prefer_void_to_null
+        return showDialog<Null>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("An error occurred!"),
+            content: const Text("Something went wrong."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Okay"),
+              )
+            ],
+          ),
+        );
+      }).then((_) {
         setState(() => _isLoading = false);
         Navigator.of(context).pop();
       });
