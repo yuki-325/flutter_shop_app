@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop_app/models/http_exception.dart';
 import 'package:shop_app/providers/product.dart';
 
 // NOTE Providerで状態管理するオブジェクトとして設定する "with ChangeNotifier"
@@ -160,20 +161,19 @@ class Products with ChangeNotifier {
     // メモリ上のデータを削除
     _items.removeWhere((product) => product.id == productId);
 
-    // サーバー上のデータを削除
-    await http.delete(url).then((response) {
-      print(response.statusCode);
+    try {
+      // サーバー上のデータを削除
+      final response = await http.delete(url);
       if (response.statusCode >= 400) {
-        throw Exception();
+        throw HttpException(message: "Could not delete product.");
       }
       existingProduct = null;
-    }).catchError((error) {
+    } catch (e) {
       // サーバ上で削除できなければ(エラーが出たら)もう一度追加しておく
       _items.insert(existingProductIndex, existingProduct!);
+      rethrow;
+    } finally {
       notifyListeners();
-      print(error);
-      throw error;
-    });
-    notifyListeners();
+    }
   }
 }
