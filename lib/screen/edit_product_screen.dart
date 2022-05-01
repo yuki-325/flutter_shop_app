@@ -117,37 +117,34 @@ class _EditProductScreenState extends State<EditProductScreen> {
       isFavorite: _editedProduct.isFavorite,
     );
 
-    if (_editedProduct.id.isEmpty) {
-      // 新規追加
-      try {
+    try {
+      if (_editedProduct.id.isEmpty) {
+        // 新規追加
         await productsData.addProduct(_editedProduct);
-      } catch (error) {
-        await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("An error occurred!"),
-            content: const Text("Something went wrong."),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Okay"),
-              )
-            ],
-          ),
-        );
-      } finally {
-        setState(() => _isLoading = false);
-        Navigator.of(context).pop();
+      } else {
+        // 更新
+        await productsData.updateProduct(_editedProduct.id, _editedProduct);
       }
-    } else {
-      // 更新
-      productsData.updateProduct(_editedProduct.id, _editedProduct);
+    } catch (error) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("An error occurred!"),
+          content: const Text("Something went wrong."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Okay"),
+            )
+          ],
+        ),
+      );
+    } finally {
       setState(() => _isLoading = false);
       Navigator.of(context).pop();
     }
-    // Navigator.of(context).pop();
   }
 
   @override
