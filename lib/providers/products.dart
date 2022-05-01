@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shop_app/providers/product.dart';
 
 // NOTE Providerで状態管理するオブジェクトとして設定する "with ChangeNotifier"
@@ -65,21 +68,36 @@ class Products with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
-  void addProduct(Product product) {
-    // _items.add(value);
-
-    final newProduct = Product(
-      id: product.id,
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
+  Future<void> addProduct(Product product) {
+    final url = Uri.https(
+      "flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app",
+      "/products.json",
     );
+    return http
+        .post(
+      url,
+      body: json.encode({
+        "title": product.title,
+        "description": product.description,
+        "price": product.price,
+        "imageUrl": product.imageUrl,
+        "isFavorite": product.isFavorite,
+      }),
+    )
+        .then((response) {
+      final newProduct = Product(
+        id: json.decode(response.body)["name"],
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+      );
 
-    _items.add(newProduct);
+      _items.add(newProduct);
 
-    // NOTE 値(_items)の変更を通知する
-    notifyListeners();
+      // NOTE 値(_items)の変更を通知する
+      notifyListeners();
+    });
   }
 
   void updateProduct(String productId, Product newProduct) {
@@ -88,5 +106,10 @@ class Products with ChangeNotifier {
       _items[prodIndex] = newProduct;
       notifyListeners();
     }
+  }
+
+  void removeProduct(String productId) {
+    _items.removeWhere((product) => product.id == productId);
+    notifyListeners();
   }
 }
