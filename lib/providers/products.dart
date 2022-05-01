@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop_app/providers/product.dart';
@@ -149,8 +150,30 @@ class Products with ChangeNotifier {
     }
   }
 
-  void removeProduct(String productId) {
+  Future<void> removeProduct(String productId) async {
+    final url = Uri.parse(
+        "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products/$productId.json");
+    final existingProductIndex =
+        _items.indexWhere((product) => product.id == productId);
+    Product? existingProduct = _items[existingProductIndex];
+
+    // メモリ上のデータを削除
     _items.removeWhere((product) => product.id == productId);
+
+    // サーバー上のデータを削除
+    await http.delete(url).then((response) {
+      print(response.statusCode);
+      if (response.statusCode >= 400) {
+        throw Exception();
+      }
+      existingProduct = null;
+    }).catchError((error) {
+      // サーバ上で削除できなければ(エラーが出たら)もう一度追加しておく
+      _items.insert(existingProductIndex, existingProduct!);
+      notifyListeners();
+      print(error);
+      throw error;
+    });
     notifyListeners();
   }
 }
