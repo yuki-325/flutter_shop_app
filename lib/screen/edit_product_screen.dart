@@ -99,7 +99,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     final productsData = Provider.of<Products>(context, listen: false);
     final isValid = _form.currentState?.validate();
     if (!(isValid!)) {
@@ -119,10 +119,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     if (_editedProduct.id.isEmpty) {
       // 新規追加
-      productsData.addProduct(_editedProduct).catchError((error) {
-        // CHECK showDialog<void>だとだめだった
-        // ignore: prefer_void_to_null
-        return showDialog<Null>(
+      try {
+        await productsData.addProduct(_editedProduct);
+      } catch (error) {
+        await showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text("An error occurred!"),
@@ -137,10 +137,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
             ],
           ),
         );
-      }).then((_) {
+      } finally {
         setState(() => _isLoading = false);
         Navigator.of(context).pop();
-      });
+      }
     } else {
       // 更新
       productsData.updateProduct(_editedProduct.id, _editedProduct);
