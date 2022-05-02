@@ -40,8 +40,8 @@ class ProductItem extends StatelessWidget {
           backgroundColor: Colors.black87,
           leading: Consumer<Product>(
             builder: (context, product, child) => IconButton(
-              onPressed: () {
-                product.togglefavoriteStatus();
+              onPressed: () async {
+                await product.togglefavoriteStatus(context);
               },
               icon: Icon(
                 (product.isFavorite ?? false)
