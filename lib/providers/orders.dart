@@ -21,19 +21,51 @@ class OrderItem {
 }
 
 class Orders with ChangeNotifier {
-  final List<OrderItem> _orders = [];
+  List<OrderItem> _orders = [];
+  final _url = Uri.parse(
+      "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/orders.json");
 
   List<OrderItem> get orders {
     return _orders;
   }
 
+  Future<void> fetchAndSetOrder() async {
+    final response = await http.get(_url);
+    final List<OrderItem> loadOrders = [];
+    final extractedData = json.decode(response.body) as Map<String, dynamic>?;
+
+    if (extractedData == null) {
+      return;
+    }
+    extractedData.forEach(
+      (orderId, orderData) {
+        loadOrders.add(
+          OrderItem(
+            id: orderId,
+            amount: orderData["amount"],
+            dateTime: DateTime.parse(orderData["dateTime"]),
+            products: (orderData["products"] as List<dynamic>)
+                .map(
+                  (cartItem) => CartItem(
+                    id: cartItem["id"],
+                    title: cartItem["title"],
+                    quantity: cartItem["quantity"],
+                    price: cartItem["price"],
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
+    );
+    _orders = loadOrders.reversed.toList();
+    notifyListeners();
+  }
+
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final timeStamp = DateTime.now();
-    final url = Uri.parse(
-        "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/orders.json");
-
     try {
-      final response = await http.post(url,
+      final response = await http.post(_url,
           body: json.encode({
             "amount": total,
             "products": cartProducts
