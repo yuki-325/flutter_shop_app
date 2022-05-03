@@ -9,6 +9,7 @@ import 'package:shop_app/screen/edit_product_screen.dart';
 import 'package:shop_app/screen/oders_screen.dart';
 import 'package:shop_app/screen/product_detail_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/screen/products_overview_screen.dart';
 import 'package:shop_app/screen/user_products_screen.dart';
 
 void main() {
@@ -37,24 +38,28 @@ class MyApp extends StatelessWidget {
           create: (_) => Orders(),
         ),
       ],
-      child: MaterialApp(
-        title: 'My Shop',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch().copyWith(
-            primary: Colors.purple,
-            secondary: Colors.deepOrange,
+      child: Consumer<Auth>(
+        builder: (context, auth, _) => MaterialApp(
+          title: 'My Shop',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSwatch().copyWith(
+              primary: Colors.purple,
+              secondary: Colors.deepOrange,
+            ),
+            fontFamily: "Lato",
           ),
-          fontFamily: "Lato",
+          home:
+              auth.isAuth ? const ProductsOverViewScreen() : const AuthScreen(),
+          routes: {
+            ProductDetailScreen.routeName: (context) =>
+                const ProductDetailScreen(),
+            CartScreen.routeName: (context) => const CartScreen(),
+            OrdersScreen.routeName: (context) => const OrdersScreen(),
+            UserProductsScreen.routeName: (context) =>
+                const UserProductsScreen(),
+            EditProductScreen.routeName: (context) => const EditProductScreen(),
+          },
         ),
-        home: const AuthScreen(),
-        routes: {
-          ProductDetailScreen.routeName: (context) =>
-              const ProductDetailScreen(),
-          CartScreen.routeName: (context) => const CartScreen(),
-          OrdersScreen.routeName: (context) => const OrdersScreen(),
-          UserProductsScreen.routeName: (context) => const UserProductsScreen(),
-          EditProductScreen.routeName: (context) => const EditProductScreen(),
-        },
       ),
     );
   }
