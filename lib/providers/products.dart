@@ -54,6 +54,23 @@ class Products with ChangeNotifier {
   //   _showFavoritesOnly = false;
   //   notifyListeners();
   // }
+  Uri? _url;
+  String? _authToken;
+
+  // Products() {
+  //   _url = Uri.parse(
+  //       "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken");
+  // }
+
+  set authToken(String? value) {
+    _authToken = value;
+    _url = Uri.parse(
+        "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$_authToken");
+  }
+
+  set items(List<Product> items) {
+    _items = items;
+  }
 
   List<Product> get favoriteItems {
     return _items.where((prodItem) => prodItem.isFavorite == true).toList();
@@ -71,10 +88,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    final url = Uri.parse(
-        "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products.json");
     try {
-      final response = await http.get(url);
+      final response = await http.get(_url!);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadProducts = [];
       extractedData.forEach((productId, productData) {
@@ -95,13 +110,9 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final url = Uri.https(
-      "flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app",
-      "/products.json",
-    );
     try {
       final response = await http.post(
-        url,
+        _url!,
         body: json.encode({
           "title": product.title,
           "description": product.description,

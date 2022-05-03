@@ -26,10 +26,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => Auth(),
         ),
-        ChangeNotifierProvider(
+        ChangeNotifierProxyProvider<Auth, Products>(
           // NOTE 状態管理するオブジェクトを設定している
           // NOTE 新しいインスタンスを使用するときはcreateメソッドの方が効率が良いらしい
-          create: (_) => Products(),
+          create: (context) => Products(),
+          update: (context, auth, previousProducts) => previousProducts!
+            ..authToken = auth.token
+            ..items = previousProducts.items,
         ),
         ChangeNotifierProvider(
           create: (_) => Cart(),
