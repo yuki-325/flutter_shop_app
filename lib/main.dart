@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart.dart';
 import 'package:shop_app/providers/orders.dart';
 import 'package:shop_app/providers/products.dart';
@@ -22,6 +23,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => Auth(),
+        ),
+        ChangeNotifierProvider(
           // NOTE 状態管理するオブジェクトを設定している
           // NOTE 新しいインスタンスを使用するときはcreateメソッドの方が効率が良いらしい
           create: (_) => Products(),
@@ -42,7 +46,7 @@ class MyApp extends StatelessWidget {
           ),
           fontFamily: "Lato",
         ),
-        home: AuthScreen(),
+        home: const AuthScreen(),
         routes: {
           ProductDetailScreen.routeName: (context) =>
               const ProductDetailScreen(),
