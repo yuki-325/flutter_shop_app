@@ -28,11 +28,10 @@ class Product with ChangeNotifier {
     isFavorite = newValue;
   }
 
-  Future<void> togglefavoriteStatus(BuildContext context) async {
-    // final productsData = Provider.of<Products>(context, listen: false);
+  Future<void> togglefavoriteStatus(String token) async {
     final oldStatus = isFavorite;
     final url = Uri.parse(
-        "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json");
+        "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json?auth=$token");
     // メモリ上の商品のお気に入りを変更
     isFavorite = !(isFavorite ?? false);
     try {
