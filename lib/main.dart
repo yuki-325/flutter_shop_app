@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
           // NOTE 新しいインスタンスを使用するときはcreateメソッドの方が効率が良いらしい
           create: (context) => Products(),
           update: (context, auth, previousProducts) => previousProducts!
+            ..userId = auth.userId
             ..authToken = auth.token
             ..items = previousProducts.items,
         ),

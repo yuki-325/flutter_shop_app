@@ -11,6 +11,11 @@ class Products with ChangeNotifier {
   List<Product> _items = [];
   Uri? _url;
   String? _authToken;
+  String? _userId;
+
+  set userId(String? value) {
+    _userId = value;
+  }
 
   set authToken(String? value) {
     _authToken = value;
@@ -39,7 +44,13 @@ class Products with ChangeNotifier {
       final response = await http.get(_url!);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadProducts = [];
-      // print(extractedData);
+
+      final getFavUrl = Uri.parse(
+          "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/userFavorites/$_userId.json?auth=$_authToken");
+
+      final favoriteResponse = await http.get(getFavUrl);
+      final favoriteData = json.decode(favoriteResponse.body);
+
       extractedData.forEach((productId, productData) {
         loadProducts.add(Product(
           id: productId,
@@ -47,7 +58,8 @@ class Products with ChangeNotifier {
           description: productData["description"],
           price: productData["price"],
           imageUrl: productData["imageUrl"],
-          isFavorite: productData["isFavorite"],
+          isFavorite:
+              favoriteData == null ? false : favoriteData[productId] ?? false,
         ));
       });
       _items = loadProducts;
@@ -66,7 +78,6 @@ class Products with ChangeNotifier {
           "description": product.description,
           "price": product.price,
           "imageUrl": product.imageUrl,
-          "isFavorite": product.isFavorite,
         }),
       );
       final newProduct = Product(

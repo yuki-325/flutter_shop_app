@@ -17,16 +17,20 @@ class Auth with ChangeNotifier {
   // });
 
   bool get isAuth {
-    return token != null;
+    return token.isNotEmpty;
   }
 
-  String? get token {
+  String get userId {
+    return _userId!;
+  }
+
+  String get token {
     if (_expiryDate != null &&
         _expiryDate!.isAfter(DateTime.now()) &&
         _token != null) {
-      return _token;
+      return _token!;
     }
-    return null;
+    return "";
   }
 
   Future<void> _authenticate(
