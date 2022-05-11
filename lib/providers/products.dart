@@ -9,7 +9,6 @@ import 'package:shop_app/providers/product.dart';
 // NOTE Providerで状態管理するオブジェクトとして設定する "with ChangeNotifier"
 class Products with ChangeNotifier {
   List<Product> _items = [];
-  Uri? _url;
   String? _authToken;
   String? _userId;
 
@@ -19,8 +18,6 @@ class Products with ChangeNotifier {
 
   set authToken(String? value) {
     _authToken = value;
-    _url = Uri.parse(
-        "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$_authToken");
   }
 
   set items(List<Product> items) {
@@ -39,9 +36,14 @@ class Products with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
-  Future<void> fetchAndSetProducts() async {
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$_userId"' : "";
+    final getProductsUrl = Uri.parse(
+        'https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$_authToken&$filterString');
+
     try {
-      final response = await http.get(_url!);
+      final response = await http.get(getProductsUrl);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadProducts = [];
 
@@ -70,14 +72,17 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
+    final addProductUrl = Uri.parse(
+        'https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$_authToken');
     try {
       final response = await http.post(
-        _url!,
+        addProductUrl,
         body: json.encode({
           "title": product.title,
           "description": product.description,
           "price": product.price,
           "imageUrl": product.imageUrl,
+          "creatorId": _userId,
         }),
       );
       final newProduct = Product(
@@ -93,7 +98,6 @@ class Products with ChangeNotifier {
       // NOTE 値(_items)の変更を通知する
       notifyListeners();
     } catch (error) {
-      print(error);
       rethrow;
     }
   }
@@ -101,10 +105,10 @@ class Products with ChangeNotifier {
   Future<void> updateProduct(String productId, Product newProduct) async {
     final prodIndex = _items.indexWhere((product) => product.id == productId);
     if (prodIndex != -1) {
-      final url = Uri.parse(
+      final updateProductUrl = Uri.parse(
           "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products/$productId.json?auth=$_authToken");
       try {
-        await http.patch(url,
+        await http.patch(updateProductUrl,
             body: json.encode({
               "title": newProduct.title,
               "price": newProduct.price,
@@ -122,7 +126,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> removeProduct(String productId) async {
-    final url = Uri.parse(
+    final removeProductUrl = Uri.parse(
         "https://flutter-shop-app-22af1-default-rtdb.asia-southeast1.firebasedatabase.app/products/$productId.json?auth=$_authToken");
     final existingProductIndex =
         _items.indexWhere((product) => product.id == productId);
@@ -133,7 +137,7 @@ class Products with ChangeNotifier {
 
     try {
       // サーバー上のデータを削除
-      final response = await http.delete(url);
+      final response = await http.delete(removeProductUrl);
       if (response.statusCode >= 400) {
         throw HttpException(message: "Could not delete product.");
       }
