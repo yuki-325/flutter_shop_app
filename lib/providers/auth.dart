@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -8,13 +9,9 @@ class Auth with ChangeNotifier {
   String? _token;
   DateTime? _expiryDate;
   String? _userId;
-  final _apiKey = "AIzaSyDHfpB16cTz7yhaU-MtKDdEItFQvt2usaA";
+  Timer? _authTimer;
 
-  // Auth({
-  //   required this._tokenk,
-  //   required this._expiryDate,
-  //   required this._userId,
-  // });
+  final _apiKey = "AIzaSyDHfpB16cTz7yhaU-MtKDdEItFQvt2usaA";
 
   bool get isAuth {
     return token.isNotEmpty;
@@ -57,6 +54,10 @@ class Auth with ChangeNotifier {
           seconds: int.parse(responseData["expiresIn"]),
         ),
       );
+
+      // auto logoutの実行
+      _autoLogout();
+
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -75,6 +76,23 @@ class Auth with ChangeNotifier {
     _token = "";
     _userId = "";
     _expiryDate = null;
+    if (_authTimer != null) {
+      _authTimer!.cancel();
+      _authTimer = null;
+    }
     notifyListeners();
+  }
+
+  void _autoLogout() {
+    if (_authTimer != null) {
+      // Timerが動いている時はキャンセルする
+      _authTimer!.cancel();
+    }
+    var timeToExpiry = 0;
+    if (_expiryDate != null) {
+      timeToExpiry = _expiryDate!.difference(DateTime.now()).inSeconds;
+    }
+
+    _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
   }
 }
